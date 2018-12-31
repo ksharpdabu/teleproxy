@@ -4,7 +4,7 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/datawire/teleproxy/pkg/tpu"
+	"github.com/datawire/teleproxy/lib/tpu"
 )
 
 type searchDomains struct {
