@@ -202,7 +202,7 @@ func intercept(dnsIP string, fallbackIP string) (func(), error) {
 		Resolve: func(domain string) string {
 			route := iceptor.Resolve(domain)
 			if route != nil {
-				return route.Ip
+				return route.IP
 			} else {
 				return ""
 			}
@@ -219,13 +219,13 @@ func intercept(dnsIP string, fallbackIP string) (func(), error) {
 
 	bootstrap := route.Table{Name: "bootstrap"}
 	bootstrap.Add(route.Route{
-		Ip:     dnsIP,
+		IP:     dnsIP,
 		Target: "1233",
 		Proto:  "udp",
 	})
 	bootstrap.Add(route.Route{
 		Name:   "teleproxy",
-		Ip:     "127.254.254.254",
+		IP:     "127.254.254.254",
 		Target: apis.Port(),
 		Proto:  "tcp",
 	})
@@ -266,7 +266,7 @@ func bridges(kubeinfo *k8s.KubeInfo) func() {
 				qualName := svc.Name() + "." + svc.Namespace() + ".svc.cluster.local"
 				table.Add(route.Route{
 					Name:   qualName,
-					Ip:     ip.(string),
+					IP:     ip.(string),
 					Proto:  "tcp",
 					Target: "1234",
 				})
@@ -299,7 +299,7 @@ func bridges(kubeinfo *k8s.KubeInfo) func() {
 	dw.Start(func(w *docker.Watcher) {
 		table := route.Table{Name: "docker"}
 		for name, ip := range w.Containers {
-			table.Add(route.Route{Name: name, Ip: ip, Proto: "tcp"})
+			table.Add(route.Route{Name: name, IP: ip, Proto: "tcp"})
 		}
 		post(table)
 	})

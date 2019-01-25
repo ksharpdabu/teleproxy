@@ -160,9 +160,9 @@ func (i *Interceptor) update(table rt.Table) {
 			if oldRouteOk {
 				switch newRoute.Proto {
 				case "tcp":
-					i.translator.ClearTCP(oldRoute.Ip)
+					i.translator.ClearTCP(oldRoute.IP)
 				case "udp":
-					i.translator.ClearUDP(oldRoute.Ip)
+					i.translator.ClearUDP(oldRoute.IP)
 				default:
 					log.Printf("INT: unrecognized protocol: %v", newRoute)
 				}
@@ -171,9 +171,9 @@ func (i *Interceptor) update(table rt.Table) {
 			if newRoute.Target != "" {
 				switch newRoute.Proto {
 				case "tcp":
-					i.translator.ForwardTCP(newRoute.Ip, newRoute.Target)
+					i.translator.ForwardTCP(newRoute.IP, newRoute.Target)
 				case "udp":
-					i.translator.ForwardUDP(newRoute.Ip, newRoute.Target)
+					i.translator.ForwardUDP(newRoute.IP, newRoute.Target)
 				default:
 					log.Printf("INT: unrecognized protocol: %v", newRoute)
 				}
@@ -196,9 +196,9 @@ func (i *Interceptor) update(table rt.Table) {
 
 		switch route.Proto {
 		case "tcp":
-			i.translator.ClearTCP(route.Ip)
+			i.translator.ClearTCP(route.IP)
 		case "udp":
-			i.translator.ClearUDP(route.Ip)
+			i.translator.ClearUDP(route.IP)
 		default:
 			log.Printf("INT: unrecognized protocol: %v", route)
 		}

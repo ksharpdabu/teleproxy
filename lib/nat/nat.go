@@ -13,7 +13,7 @@ type commonTranslator struct {
 
 type Address struct {
 	Proto string
-	Ip    string
+	IP    string
 }
 
 type Entry struct {
@@ -22,7 +22,7 @@ type Entry struct {
 }
 
 func (e *Entry) String() string {
-	return fmt.Sprintf("%s:%s->%s", e.Destination.Proto, e.Destination.Ip, e.Port)
+	return fmt.Sprintf("%s:%s->%s", e.Destination.Proto, e.Destination.IP, e.Port)
 }
 
 func (t *Translator) sorted() []Entry {
@@ -31,7 +31,7 @@ func (t *Translator) sorted() []Entry {
 	index := 0
 	for k, v := range t.Mappings {
 		entries[index] = Entry{k, v}
-		index += 1
+		index++
 	}
 
 	sort.Slice(entries, func(i, j int) bool {

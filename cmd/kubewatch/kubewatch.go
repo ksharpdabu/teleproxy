@@ -50,34 +50,34 @@ func (s *Syncer) maybeSync() {
 }
 
 func (s *Syncer) sync() {
-	s.SyncCount += 1
-	snapshot_id := s.write()
-	s.invoke(snapshot_id)
+	s.SyncCount++
+	snapshotID := s.write()
+	s.invoke(snapshotID)
 }
 
 func (s *Syncer) write() string {
 	s.snapshotMux.Lock()
 	defer s.snapshotMux.Unlock()
-	snapshot_id := fmt.Sprintf("%d", s.SyncCount)
-	s.snapshots[snapshot_id] = make(map[string][]byte)
+	snapshotID := fmt.Sprintf("%d", s.SyncCount)
+	s.snapshots[snapshotID] = make(map[string][]byte)
 	for _, kind := range s.Kinds {
 		resources := s.Watcher.List(kind)
 		bytes, err := k8s.MarshalResources(resources)
 		if err != nil {
 			panic(err)
 		}
-		s.snapshots[snapshot_id][kind] = bytes
+		s.snapshots[snapshotID][kind] = bytes
 		for _, rsrc := range resources {
 			qname := path.Join(kind, rsrc.Namespace(), rsrc.Name())
 			bytes, err := k8s.MarshalResource(rsrc)
 			if err != nil {
 				panic(err)
 			}
-			s.snapshots[snapshot_id][qname] = bytes
+			s.snapshots[snapshotID][qname] = bytes
 		}
 	}
 	s.cleanup()
-	return snapshot_id
+	return snapshotID
 }
 
 func (s *Syncer) cleanup() {
@@ -96,8 +96,8 @@ func (s *Syncer) cleanup() {
 	}
 }
 
-func (s *Syncer) invoke(snapshot_id string) {
-	k := tpu.NewKeeper("SYNC", fmt.Sprintf("%s http://localhost:%s/api/snapshot/%s", s.SyncCommand, s.port, snapshot_id))
+func (s *Syncer) invoke(snapshotID string) {
+	k := tpu.NewKeeper("SYNC", fmt.Sprintf("%s http://localhost:%s/api/snapshot/%s", s.SyncCommand, s.port, snapshotID))
 	k.Limit = 1
 	k.Start()
 	k.Wait()
@@ -181,8 +181,8 @@ func (s *Syncer) handleSnapshot() http.HandlerFunc {
 		defer s.snapshotMux.Unlock()
 		parts := strings.Split(r.URL.Path, "/")
 		parts = parts[3:]
-		snapshot_id := parts[0]
-		snapshot, ok := s.snapshots[snapshot_id]
+		snapshotID := parts[0]
+		snapshot, ok := s.snapshots[snapshotID]
 		if !ok {
 			http.NotFound(w, r)
 			return
