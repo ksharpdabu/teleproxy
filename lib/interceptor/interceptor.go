@@ -2,12 +2,13 @@ package interceptor
 
 import (
 	"encoding/json"
-	"github.com/datawire/teleproxy/lib/nat"
-	rt "github.com/datawire/teleproxy/lib/route"
 	"log"
 	"net"
 	"strings"
 	"sync"
+
+	"github.com/datawire/teleproxy/lib/nat"
+	rt "github.com/datawire/teleproxy/lib/route"
 )
 
 type Interceptor struct {

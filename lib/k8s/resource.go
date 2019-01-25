@@ -12,7 +12,7 @@ import (
 
 	"github.com/Masterminds/sprig"
 	ms "github.com/mitchellh/mapstructure"
-	"gopkg.in/yaml.v2"
+	yaml "gopkg.in/yaml.v2"
 )
 
 var READY = map[string]func(Resource) bool{

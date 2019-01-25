@@ -1,11 +1,13 @@
 package proxy
 
 import (
-	"github.com/datawire/teleproxy/lib/tpu"
-	"golang.org/x/net/proxy"
 	"io"
 	"log"
 	"net"
+
+	"golang.org/x/net/proxy"
+
+	"github.com/datawire/teleproxy/lib/tpu"
 )
 
 type Proxy struct {
