@@ -6,3 +6,6 @@ linters:
     - goimports
     #- golint
     - unconvert
+    - stylecheck
+    - structcheck
+    - varcheck
