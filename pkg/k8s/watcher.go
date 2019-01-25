@@ -69,7 +69,7 @@ func NewWatcher(c *Client) *Watcher {
 // BUG(lukeshu): Canonical's TYPE is just the resource type
 // name/kind/shortname; it does NOT include the version or API group.
 // This is because of limitations in Client.ResolveResourceType.
-func (w *Watcher) Canonical(name string) string {
+func (client *Client) Canonicalize(name string) string {
 	parts := strings.Split(name, "/")
 
 	var kind string
@@ -84,7 +84,7 @@ func (w *Watcher) Canonical(name string) string {
 		return ""
 	}
 
-	ri := w.client.ResolveResourceType(kind)
+	ri := client.ResolveResourceType(kind)
 	//kind = ri.Name + "." + ri.Version + "." + ri.Group
 	kind = ri.Name
 
@@ -171,7 +171,7 @@ func (w *Watcher) WatchNamespace(namespace, resources string, listener func(*Wat
 		w.wg.Done()
 	}
 
-	kind := w.Canonical(ri.Kind)
+	kind := w.client.Canonicalize(ri.Kind)
 	w.watches[kind] = watch{
 		namespace: namespace,
 		resource:  resource,
@@ -223,7 +223,7 @@ func (w *Watcher) sync(kind string) {
 }
 
 func (w *Watcher) List(kind string) []Resource {
-	kind = w.Canonical(kind)
+	kind = w.client.Canonicalize(kind)
 	watch, ok := w.watches[kind]
 	if ok {
 		objs := watch.store.List()
@@ -238,7 +238,7 @@ func (w *Watcher) List(kind string) []Resource {
 }
 
 func (w *Watcher) UpdateStatus(resource Resource) (Resource, error) {
-	kind := w.Canonical(resource.Kind())
+	kind := w.client.Canonicalize(resource.Kind())
 	if kind == "" {
 		return nil, fmt.Errorf("unknown resource: %v", resource.Kind())
 	}
