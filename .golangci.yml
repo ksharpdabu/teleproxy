@@ -9,3 +9,4 @@ linters:
     - stylecheck
     - structcheck
     - varcheck
+    - staticcheck
