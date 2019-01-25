@@ -224,6 +224,7 @@ func (w *Watcher) Exists(kind, qname string) bool {
 
 func (w *Watcher) Stop() {
 	close(w.stop)
+	w.wg.Wait()
 }
 
 func (w *Watcher) Wait() {
