@@ -60,58 +60,6 @@ func NewWatcher(c *Client) *Watcher {
 	return w
 }
 
-// Canonical returns the canonical form of either a resource name or a
-// resource type name:
-//
-//   ResourceName: TYPE/NAME[.NAMESPACE]
-//   ResourceType: TYPE
-//
-// BUG(lukeshu): Canonical's TYPE is just the resource type
-// name/kind/shortname; it does NOT include the version or API group.
-// This is because of limitations in Client.ResolveResourceType.
-func (client *Client) Canonicalize(name string) string {
-	parts := strings.Split(name, "/")
-
-	var kind string
-	switch len(parts) {
-	case 1:
-		kind = parts[0]
-		name = ""
-	case 2:
-		kind = parts[0]
-		name = parts[1]
-	default:
-		return ""
-	}
-
-	ri := client.ResolveResourceType(kind)
-	//kind = ri.Name + "." + ri.Version + "." + ri.Group
-	kind = ri.Name
-
-	if name == "" {
-		return kind
-	}
-
-	if ri.Namespaced {
-		var namespace string
-
-		parts = strings.Split(name, ".")
-		switch len(parts) {
-		case 1:
-			namespace = "default"
-		case 2:
-			name = parts[0]
-			namespace = parts[1]
-		default:
-			return ""
-		}
-
-		return fmt.Sprintf("%s/%s.%s", kind, name, namespace)
-	} else {
-		return fmt.Sprintf("%s/%s", kind, name)
-	}
-}
-
 func (w *Watcher) Watch(resources string, listener func(*Watcher)) error {
 	return w.WatchNamespace("", resources, listener)
 }
