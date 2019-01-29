@@ -89,7 +89,7 @@ func (w *Watcher) WatchNamespace(namespace, resources string, listener func(*Wat
 		listener(w)
 	}
 
-	store, controller := cache.NewInformer(
+	store, informerController := cache.NewInformer(
 		listWatchAdapter{watched},
 		nil,
 		5*time.Minute,
@@ -115,7 +115,7 @@ func (w *Watcher) WatchNamespace(namespace, resources string, listener func(*Wat
 	)
 
 	runner := func() {
-		controller.Run(w.stop)
+		informerController.Run(w.stop)
 		w.wg.Done()
 	}
 
