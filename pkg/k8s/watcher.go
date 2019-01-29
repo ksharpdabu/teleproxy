@@ -44,6 +44,7 @@ type Watcher struct {
 type watch struct {
 	namespace string
 	resource  dynamic.NamespaceableResourceInterface
+	hasSynced cache.InformerSynced
 	store     cache.Store
 	invoke    func()
 	runner    func()
@@ -83,10 +84,13 @@ func (w *Watcher) WatchNamespace(namespace, resources string, listener func(*Wat
 		watched = resource
 	}
 
+	var hasSynced cache.InformerSynced
 	invoke := func() {
 		w.mutex.Lock()
 		defer w.mutex.Unlock()
-		listener(w)
+		if hasSynced() {
+			listener(w)
+		}
 	}
 
 	store, informerController := cache.NewInformer(
@@ -114,6 +118,8 @@ func (w *Watcher) WatchNamespace(namespace, resources string, listener func(*Wat
 		},
 	)
 
+	hasSynced = informerController.HasSynced
+
 	runner := func() {
 		informerController.Run(w.stop)
 		w.wg.Done()
@@ -123,6 +129,7 @@ func (w *Watcher) WatchNamespace(namespace, resources string, listener func(*Wat
 	w.watches[kind] = watch{
 		namespace: namespace,
 		resource:  resource,
+		hasSynced: informerController.HasSynced,
 		store:     store,
 		invoke:    invoke,
 		runner:    runner,
@@ -140,33 +147,22 @@ func (w *Watcher) Start() {
 		w.started = true
 		w.mutex.Unlock()
 	}
-	for kind := range w.watches {
-		w.sync(kind)
-	}
-
-	for _, watch := range w.watches {
-		watch.invoke()
-	}
 
 	w.wg.Add(len(w.watches))
 	for _, watch := range w.watches {
 		go watch.runner()
 	}
-}
 
-func (w *Watcher) sync(kind string) {
-	watch := w.watches[kind]
-	resources, err := w.client.ListNamespace(watch.namespace, kind)
-	if err != nil {
-		log.Fatal(err)
+	informerSynceds := make([]cache.InformerSynced, 0, len(w.watches))
+	for _, watch := range w.watches {
+		informerSynceds = append(informerSynceds, watch.hasSynced)
 	}
-	for _, rsrc := range resources {
-		var uns unstructured.Unstructured
-		uns.SetUnstructuredContent(rsrc)
-		err = watch.store.Update(&uns)
-		if err != nil {
-			log.Fatal(err)
-		}
+	if !cache.WaitForCacheSync(w.stopCh, informerSynceds...) {
+		log.Fatal("failed to sync")
+	}
+
+	for _, watch := range w.watches {
+		watch.invoke()
 	}
 }
 
